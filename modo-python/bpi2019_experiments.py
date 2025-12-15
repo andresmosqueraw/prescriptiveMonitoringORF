@@ -247,7 +247,7 @@ for i in itertools.product(N_trees, Min_leaf_size, Max_depth, Subsample_ratio, L
 
     plt.savefig('Results/Qini_curve_BPIC19_%s.png'%str(i), format='png', dpi=300)
 
-df_results.to_csv('Results/dataframe_with_results_BPIC19', index=False)
+df_results.to_csv('Results/dataframe_with_results_BPIC19.csv', index=False)
 
 # Data prep for running baseline
 train = train[train[treatment]==0]
