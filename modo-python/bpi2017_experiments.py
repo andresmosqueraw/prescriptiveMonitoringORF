@@ -7,6 +7,9 @@ Original file is located at
     https://colab.research.google.com/drive/153Nq5lhryUUXS9g3kiZZx-gSYmvMqUcJ
 """
 
+import sys
+import os
+
 import pandas as pd
 import numpy as np
 from numpy import savetxt
@@ -15,13 +18,25 @@ from sklearn.preprocessing import StandardScaler
 pd.set_option('display.max_columns', None)
 import itertools
 
+# Ensure we use the local EconML package in this repo instead of (or before) any pip-installed version
+EconML_repo_path = os.path.abspath(
+    os.path.join(
+        os.path.dirname(__file__),
+        os.pardir,  # go up from modo-python
+        os.pardir,  # go up into prescriptive-process-monitoring-cost-aware-cycle-time-reduction
+        os.pardir,  # up into prescriptive-process-monitoring
+        "EconML"
+    )
+)
+if EconML_repo_path not in sys.path:
+    sys.path.insert(0, EconML_repo_path)
+
 import econml
 import warnings
 warnings.filterwarnings('ignore')
 
-# Commented out IPython magic to ensure Python compatibility.
-# Main imports
-from econml.ortho_forest import DMLOrthoForest, DROrthoForest
+# Main imports adapted to new EconML layout
+from econml.orf import DMLOrthoForest, DROrthoForest
 from econml.sklearn_extensions.linear_model import WeightedLassoCVWrapper, WeightedLasso, WeightedLassoCV
 from econml.metalearners import TLearner
 
@@ -58,7 +73,8 @@ static_cat_cols = ['ApplicationType', 'LoanGoal']
 dynamic_num_cols = ['FirstWithdrawalAmount', 'MonthlyCost', 'NumberOfTerms', 'OfferedAmount', "open_cases", "month", "weekday", "hour"]
 static_num_cols = ['RequestedAmount', 'CreditScore', 'timesincefirstcase', 'duration', 'treatment']
 
-df2 = pd.read_csv('data_17_incompleteFiles.csv')
+# Cargar datos preparados para BPIC 2017 (ruta relativa a la raíz del proyecto)
+df2 = pd.read_csv('modo-python/data_bpic17_readyToUse.csv')
 
 # Prepare data for time of activity treatment
 train, test = train_test_split(df2, test_size=0.2, shuffle=False)
@@ -118,7 +134,8 @@ for i in itertools.product(N_trees, Min_leaf_size, Max_depth, Subsample_ratio, L
         random_state=106
        )
 
-    ortho_model = est.fit(Y, T, X, W)
+    # Nueva firma de DMLOrthoForest en econml requiere X y W como argumentos con nombre
+    ortho_model = est.fit(Y, T, X=X, W=W)
     batches = np.array_split(X_test, X_test.shape[0] / 100)
     treatment_effects = est.const_marginal_effect(batches[0])
     ii = 0

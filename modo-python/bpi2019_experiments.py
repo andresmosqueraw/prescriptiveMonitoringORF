@@ -7,22 +7,36 @@ Original file is located at
     https://colab.research.google.com/drive/1t-yjDIUJoTOVSGHGUsU9Tpmsm4cxdnB1
 """
 
+import sys
+import os
+
 import pandas as pd
 import numpy as np
 from numpy import savetxt
 from tqdm import tqdm, tqdm_notebook
 from sklearn.preprocessing import StandardScaler
 pd.set_option('display.max_columns', None)
-import sys
 import itertools
+
+# Ensure we use the local EconML package in this repo instead of (or before) any pip-installed version
+EconML_repo_path = os.path.abspath(
+    os.path.join(
+        os.path.dirname(__file__),
+        os.pardir,  # go up from modo-python
+        os.pardir,  # go up into prescriptive-process-monitoring-cost-aware-cycle-time-reduction
+        os.pardir,  # up into prescriptive-process-monitoring
+        "EconML"
+    )
+)
+if EconML_repo_path not in sys.path:
+    sys.path.insert(0, EconML_repo_path)
 
 import econml
 import warnings
-#warnings.filterwarnings('ignore')
+# warnings.filterwarnings('ignore')
 
-# Commented out IPython magic to ensure Python compatibility.
-# Main imports
-from econml.ortho_forest import DMLOrthoForest, DROrthoForest, DiscreteTreatmentOrthoForest
+# Main imports adapted to new EconML layout
+from econml.orf import DMLOrthoForest, DROrthoForest
 from econml.sklearn_extensions.linear_model import WeightedLassoCVWrapper, WeightedLasso, WeightedLassoCV
 
 from econml.cate_interpreter import SingleTreeCateInterpreter, SingleTreePolicyInterpreter
@@ -68,7 +82,7 @@ num_cols = dynamic_num_cols + static_num_cols
 
 tqdm.pandas()
 
-df2 =pd.read_csv('data_bpic19_readyToUse.csv')
+df2 = pd.read_csv('modo-python/data_bpic19_readyToUse.csv')
 df2['treatment'] = df2[treatment].replace({0:1, 1:0})
 
 # Define some parameters
@@ -142,7 +156,8 @@ for i in itertools.product(N_trees, Min_leaf_size, Max_depth, Subsample_ratio, L
         random_state=200
        )
 
-    ortho_model = est.fit(Y, T, X, W)
+    # Nueva firma de DMLOrthoForest en econml requiere X y W como argumentos con nombre
+    ortho_model = est.fit(Y, T, X=X, W=W)
     batches = np.array_split(X_test, X_test.shape[0] / 100)
     treatment_effects = est.const_marginal_effect(batches[0])
     ii = 0
