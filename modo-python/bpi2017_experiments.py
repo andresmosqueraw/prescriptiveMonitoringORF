@@ -74,7 +74,7 @@ dynamic_num_cols = ['FirstWithdrawalAmount', 'MonthlyCost', 'NumberOfTerms', 'Of
 static_num_cols = ['RequestedAmount', 'CreditScore', 'timesincefirstcase', 'duration', 'treatment']
 
 # Cargar datos preparados para BPIC 2017 (ruta relativa a la raíz del proyecto)
-df2 = pd.read_csv('modo-python/data_bpic17_readyToUse.csv')
+df2 = pd.read_csv('data_bpic17_readyToUse.csv')
 
 # Prepare data for time of activity treatment
 train, test = train_test_split(df2, test_size=0.2, shuffle=False)
@@ -109,6 +109,13 @@ Min_leaf_size = [20]
 Max_depth = [30]
 Subsample_ratio = [0.4]
 Lambda_reg = [0.01]
+
+# para prueba rapida
+# N_trees = [1]
+# Min_leaf_size = [200]
+# Max_depth = [1]
+# Subsample_ratio = [0.1]
+# Lambda_reg= [1.0]
 
 # preparing the test set
 f_test = test.drop([outcome, treatment], axis=1)
@@ -242,7 +249,11 @@ plt.ylabel('Expected Incremental Reduction in Duration')
 plt.legend(loc='best')
 plt.title('Qini Curve')
 
-plt.savefig('Results/bpic_17_qini_withBaseline', format='png', dpi=300)
+# Asegurar que la carpeta Results existe antes de guardar
+os.makedirs('Results', exist_ok=True)
+
+plt.savefig('Results/bpic_17_qini_withBaseline.png', format='png', dpi=300)
+plt.close()
 
 value = [1]
 cost = [3,1,2,0.5,0.2]
@@ -250,6 +261,7 @@ cost = [0.3,0.5,1,2,3]
 
 percentages = [10,20,30,40,50,60,70,80,90,100]
 
+plt.figure()
 for i in itertools.product(value, cost):
     net_value = [0]
     v = i[0]
@@ -274,10 +286,11 @@ for i in itertools.product(value, cost):
     plt.plot([0]+percentages, net_value, label="v/c=%s"%str(round(v/c,1)), marker="o")
 #     plt.plot([0,percentages[9]], [0,net_value[10]], label="'Random Policy",  marker="o", color='Gray',
 #              linestyle='dashed')
-    plt.xlabel('Proportion of Cases Targeted')
-    plt.ylabel('Expected Net Value')
-    plt.legend(loc='best')
-    plt.title('Net-value Curve')
+plt.xlabel('Proportion of Cases Targeted')
+plt.ylabel('Expected Net Value')
+plt.legend(loc='best')
+plt.title('Net-value Curve')
 
 plt.savefig('Results/bpic_17_netValue.png', format='png', dpi=300)
+plt.close()
 

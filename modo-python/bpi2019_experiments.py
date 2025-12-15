@@ -82,7 +82,7 @@ num_cols = dynamic_num_cols + static_num_cols
 
 tqdm.pandas()
 
-df2 = pd.read_csv('modo-python/data_bpic19_readyToUse.csv')
+df2 = pd.read_csv('data_bpic19_readyToUse.csv')
 df2['treatment'] = df2[treatment].replace({0:1, 1:0})
 
 # Define some parameters
@@ -91,6 +91,13 @@ Min_leaf_size = [10]
 Max_depth = [10]
 Subsample_ratio = [0.7]
 Lambda_reg= [0.01]
+
+# para prueba rapida
+# N_trees = [1]
+# Min_leaf_size = [200]
+# Max_depth = [1]
+# Subsample_ratio = [0.1]
+# Lambda_reg= [1.0]
 
 # preparing the data
 train, valid = train_test_split(df2, test_size=0.2, shuffle=False)
@@ -358,7 +365,11 @@ plt.ylabel('Expected Incremental Reduction in Duration')
 plt.legend(loc='best')
 plt.title('Qini Curve')
 
+# Asegurar que la carpeta Results existe antes de guardar
+os.makedirs('Results', exist_ok=True)
+
 plt.savefig('Results/Qini_curve_BPIC19_withBaseline.png', format='png', dpi=300)
+plt.close()
 
 # net value curves
 value = [1]
@@ -366,6 +377,7 @@ cost = [0.3,0.5,1,2,3]
 
 percentages = [10,20,30,40,50,60,70,80,90,100]
 
+plt.figure()
 for i in itertools.product(value, cost):
     v = i[0]
     c = i[1]
@@ -396,10 +408,10 @@ for i in itertools.product(value, cost):
     #     plt.plot([0]+percentages, net_value3, label="TE Upper bound", marker="o", color='Red')
 #     plt.plot([0,percentages[9]], [0,net_value[10]], label="Random Policy",  marker="o", color='Black',
 #              linestyle='dashed')
-    plt.xlabel('Proportion of Cases Targeted')
-    plt.ylabel('Expected Net Value')
-    plt.legend(loc='best')
-    plt.title('Net-value Curve')
+plt.xlabel('Proportion of Cases Targeted')
+plt.ylabel('Expected Net Value')
+plt.legend(loc='best')
+plt.title('Net-value Curve')
 
 plt.savefig('Results/NetVal_curve_BPIC19.png', format='png', dpi=300)
-
+plt.close()
